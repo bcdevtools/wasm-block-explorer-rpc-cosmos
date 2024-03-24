@@ -28,7 +28,9 @@ type EvmBackendI interface {
 
 	// ERC-20
 
-	GetErc20ContractInfo(address common.Address) (berpctypes.GenericBackendResponse, error)
+	GetErc20ContractInfo(contractAddress common.Address) (berpctypes.GenericBackendResponse, error)
+
+	GetErc20Balance(accountAddress common.Address, contractAddresses []common.Address) (berpctypes.GenericBackendResponse, error)
 
 	// Misc
 
