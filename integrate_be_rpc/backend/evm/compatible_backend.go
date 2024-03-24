@@ -3,6 +3,7 @@
 package evm
 
 import (
+	berpctypes "github.com/bcdevtools/block-explorer-rpc-cosmos/be_rpc/types"
 	"github.com/bcdevtools/integrate-block-explorer-rpc-cosmos/integrate_be_rpc/compatible"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/server"
@@ -27,6 +28,7 @@ func NewEvmBackend(
 	ctx *server.Context,
 	logger log.Logger,
 	clientCtx client.Context,
+	externalServices berpctypes.ExternalServices,
 ) *EvmBackend {
 	compatible.PanicInvalidBuildTag()
 	return nil
