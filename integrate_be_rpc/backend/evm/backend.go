@@ -26,6 +26,10 @@ type EvmBackendI interface {
 
 	GetEvmTransactionInvolversByHash(hash common.Hash) (berpctypes.MessageInvolversResult, error)
 
+	// ERC-20
+
+	GetErc20ContractInfo(address common.Address) (berpctypes.GenericBackendResponse, error)
+
 	// Misc
 
 	GetEvmModuleParams() (*evmtypes.Params, error)
