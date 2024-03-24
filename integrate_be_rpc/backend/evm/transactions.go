@@ -7,6 +7,7 @@ import (
 	berpctypes "github.com/bcdevtools/block-explorer-rpc-cosmos/be_rpc/types"
 	"github.com/cosmos/cosmos-sdk/types/tx"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/evmos/evmos/v12/rpc/backend"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -46,10 +47,21 @@ func (m *EvmBackend) GetEvmTransactionByHash(hash common.Hash) (berpctypes.Gener
 	txRes := cosmosTxResult.TxResponse
 	txEvents := berpctypes.ConvertTxEvent(txRes.Events).RemoveUnnecessaryEvmTxEvents()
 
-	return berpctypes.GenericBackendResponse{
-		"hash":   hash,
-		"height": blockNumber,
-		"rpc_tx": rpcTx,
+	logs, err := backend.TxLogsFromEvents(txRes.Events, int(evmTxResult.MsgIndex))
+	if err != nil {
+		return nil, status.Error(codes.Internal, errors.Wrap(err, "failed to get transaction logs").Error())
+	}
+
+	receipt, err := m.evmJsonRpcBackend.GetTransactionReceipt(hash)
+	if err != nil {
+		return nil, status.Error(codes.Internal, errors.Wrap(err, "failed to get transaction receipt").Error())
+	}
+
+	res := berpctypes.GenericBackendResponse{
+		"hash":        hash,
+		"height":      blockNumber,
+		"evm_tx":      rpcTx,
+		"evm_receipt": receipt,
 		"result": map[string]any{
 			"code":   txRes.Code,
 			"events": txEvents,
@@ -58,5 +70,11 @@ func (m *EvmBackend) GetEvmTransactionByHash(hash common.Hash) (berpctypes.Gener
 				"used":  txRes.GasUsed,
 			},
 		},
-	}, nil
+	}
+
+	if len(logs) > 0 {
+		res["logs"] = logs
+	}
+
+	return res, nil
 }
