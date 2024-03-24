@@ -17,7 +17,7 @@ This file is used to get rid of compile error in IDE.
 var _ EvmBackendI = (*EvmBackend)(nil)
 
 type EvmBackendI interface {
-	GetEvmTransactionInvolversByHash(hash common.Hash, optionalTxResult *coretypes.ResultTx) (berpctypes.MessageInvolversResult, error)
+	GetEvmTransactionInvolversByHash(hash common.Hash) (berpctypes.MessageInvolversResult, error)
 }
 
 type EvmBackend struct {
@@ -35,6 +35,6 @@ func NewEvmBackend(
 	return nil
 }
 
-func (m *EvmBackend) GetEvmTransactionInvolversByHash(hash common.Hash, optionalTxResult *coretypes.ResultTx) (berpctypes.MessageInvolversResult, error) {
+func (m *EvmBackend) GetEvmTransactionInvolversByHash(hash common.Hash) (berpctypes.MessageInvolversResult, error) {
 	return nil, nil
 }

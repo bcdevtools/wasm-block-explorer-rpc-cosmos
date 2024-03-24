@@ -14,7 +14,6 @@ import (
 	evmostypes "github.com/evmos/evmos/v12/types"
 	evmtypes "github.com/evmos/evmos/v12/x/evm/types"
 	"github.com/tendermint/tendermint/libs/log"
-	coretypes "github.com/tendermint/tendermint/rpc/core/types"
 )
 
 var _ EvmBackendI = (*EvmBackend)(nil)
@@ -25,7 +24,7 @@ type EvmBackendI interface {
 	// GetEvmTransactionByHash returns a transaction by its hash.
 	GetEvmTransactionByHash(hash common.Hash) (berpctypes.GenericBackendResponse, error)
 
-	GetEvmTransactionInvolversByHash(hash common.Hash, optionalTxResult *coretypes.ResultTx) (berpctypes.MessageInvolversResult, error)
+	GetEvmTransactionInvolversByHash(hash common.Hash) (berpctypes.MessageInvolversResult, error)
 
 	// Misc
 
