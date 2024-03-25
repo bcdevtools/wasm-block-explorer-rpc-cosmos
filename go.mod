@@ -9,7 +9,7 @@ require (
 	github.com/evmos/evmos/v12 v12.1.6
 	github.com/pkg/errors v0.9.1
 	github.com/tendermint/tendermint v0.34.29
-	google.golang.org/grpc v1.57.0
+	google.golang.org/grpc v1.57.1
 )
 
 require (
