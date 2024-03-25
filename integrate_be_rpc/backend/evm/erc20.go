@@ -5,9 +5,9 @@ package evm
 import (
 	"encoding/hex"
 	berpctypes "github.com/bcdevtools/block-explorer-rpc-cosmos/be_rpc/types"
+	iberpcutils "github.com/bcdevtools/integrate-block-explorer-rpc-cosmos/integrate_be_rpc/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/evmos/evmos/v12/contracts"
 	evmosrpctypes "github.com/evmos/evmos/v12/rpc/types"
 	evmtypes "github.com/evmos/evmos/v12/x/evm/types"
 	"github.com/pkg/errors"
@@ -47,35 +47,39 @@ func (m *EvmBackend) GetErc20ContractInfo(contractAddress common.Address) (berpc
 		return nil, err
 	}
 
-	call := func(_4bytes string) ([]byte, error) {
-		return m.evmCall(_4bytes, contractAddress, chainId, blockNumber, 0)
+	call := func(input string) ([]byte, error) {
+		return m.EvmCall(input, contractAddress, chainId, &blockNumber, 0)
 	}
 
 	res := make(berpctypes.GenericBackendResponse)
 
-	symbol, err := call("0x95d89b41")
+	symbol, err := call("0x95d89b41") // symbol()
 	if err != nil {
 		return nil, err
 	}
-	unpackedSymbol, err := contracts.ERC20MinterBurnerDecimalsContract.ABI.Methods["symbol"].Outputs.Unpack(symbol)
-	if err != nil {
-		return nil, err
+	if len(symbol) > 0 {
+		unpackedSymbol, err := iberpcutils.UnpackAbiString(symbol, "symbol")
+		if err != nil {
+			return nil, err
+		}
+		res["symbol"] = unpackedSymbol
 	}
-	res["symbol"] = unpackedSymbol[0].(string)
 
-	decimals, err := call("0x313ce567")
+	decimals, err := call("0x313ce567") // decimals()
 	if err != nil {
 		return nil, err
 	}
 	res["decimals"] = new(big.Int).SetBytes(decimals).Int64()
 
-	name, err := call("0x06fdde03")
+	name, err := call("0x06fdde03") // name()
 	if err == nil {
-		unpackedName, err := contracts.ERC20MinterBurnerDecimalsContract.ABI.Methods["name"].Outputs.Unpack(name)
-		if err != nil {
-			return nil, err
+		if len(name) > 0 {
+			unpackedName, err := iberpcutils.UnpackAbiString(name, "name")
+			if err != nil {
+				return nil, err
+			}
+			res["name"] = unpackedName
 		}
-		res["name"] = unpackedName[0].(string)
 	}
 
 	return res, nil
@@ -84,6 +88,16 @@ func (m *EvmBackend) GetErc20ContractInfo(contractAddress common.Address) (berpc
 func (m *EvmBackend) GetErc20Balance(accountAddress common.Address, contractAddresses []common.Address) (berpctypes.GenericBackendResponse, error) {
 	res := berpctypes.GenericBackendResponse{
 		"account": accountAddress.String(),
+	}
+
+	blockNumber, err := m.evmJsonRpcBackend.BlockNumber()
+	if err != nil {
+		return nil, err
+	}
+
+	chainId, err := m.evmJsonRpcBackend.ChainID()
+	if err != nil {
+		return nil, err
 	}
 
 	for _, contractAddress := range contractAddresses {
@@ -98,18 +112,8 @@ func (m *EvmBackend) GetErc20Balance(accountAddress common.Address, contractAddr
 			return nil, status.Error(codes.NotFound, errors.New("not a contract").Error())
 		}
 
-		blockNumber, err := m.evmJsonRpcBackend.BlockNumber()
-		if err != nil {
-			return nil, err
-		}
-
-		chainId, err := m.evmJsonRpcBackend.ChainID()
-		if err != nil {
-			return nil, err
-		}
-
-		call := func(_4bytes string) ([]byte, error) {
-			return m.evmCall(_4bytes, contractAddress, chainId, blockNumber, 0)
+		call := func(input string) ([]byte, error) {
+			return m.EvmCall(input, contractAddress, chainId, &blockNumber, 0)
 		}
 
 		resPerContract := berpctypes.GenericBackendResponse{
@@ -122,19 +126,17 @@ func (m *EvmBackend) GetErc20Balance(accountAddress common.Address, contractAddr
 			display, err = call("0x06fdde03") // name()
 		}
 		if err == nil && len(display) > 0 {
-			unpackedDisplay, err := contracts.ERC20MinterBurnerDecimalsContract.ABI.Methods["symbol"].Outputs.Unpack(display)
+			unpackedDisplay, err := iberpcutils.UnpackAbiString(display, "symbol")
 			if err != nil {
 				resPerContract["display_error"] = err.Error()
 			} else {
-				resPerContract["display"] = unpackedDisplay[0].(string)
+				resPerContract["display"] = unpackedDisplay
 			}
-		} else if err == nil {
-			resPerContract["display"] = ""
-		} else {
+		} else if err != nil {
 			resPerContract["display_error"] = err.Error()
 		}
 
-		decimals, err := call("0x313ce567")
+		decimals, err := call("0x313ce567") // decimals()
 		if err != nil {
 			resPerContract["decimals_error"] = err.Error()
 		} else {
@@ -153,22 +155,44 @@ func (m *EvmBackend) GetErc20Balance(accountAddress common.Address, contractAddr
 	return res, nil
 }
 
-func (m *EvmBackend) evmCall(_4bytes string, contract common.Address, chainId *hexutil.Big, blockNumber hexutil.Uint64, overrideGas uint64) ([]byte, error) {
-	if strings.HasPrefix(_4bytes, "0x") {
-		_4bytes = _4bytes[2:]
+func (m *EvmBackend) EvmCall(input string, contract common.Address, optionalChainId *hexutil.Big, optionalBlockNumber *hexutil.Uint64, optionalGas uint64) ([]byte, error) {
+	var chainId *hexutil.Big
+	if optionalChainId == nil {
+		resChainId, err := m.evmJsonRpcBackend.ChainID()
+		if err != nil {
+			return nil, err
+		}
+		chainId = resChainId
+	} else {
+		chainId = optionalChainId
 	}
-	bz, err := hex.DecodeString(_4bytes)
+
+	var blockNumber hexutil.Uint64
+	if optionalBlockNumber == nil || (*optionalBlockNumber) == 0 {
+		resBlockNumber, err := m.evmJsonRpcBackend.BlockNumber()
+		if err != nil {
+			return nil, err
+		}
+		blockNumber = resBlockNumber
+	} else {
+		blockNumber = *optionalBlockNumber
+	}
+
+	if strings.HasPrefix(input, "0x") {
+		input = input[2:]
+	}
+	bz, err := hex.DecodeString(input)
 	if err != nil {
 		return nil, err
 	}
 	var gas uint64
-	if overrideGas == 0 {
+	if optionalGas == 0 {
 		gas = 300_000
 	} else {
-		gas = overrideGas
+		gas = optionalGas
 	}
 	gasB := hexutil.Uint64(gas)
-	dataB := hexutil.Bytes(bz)
+	inputB := hexutil.Bytes(bz)
 	gasPriceB := hexutil.Big(*(new(big.Int).SetUint64(math.MaxUint64)))
 	nonceB := hexutil.Uint64(0)
 	res, err := m.evmJsonRpcBackend.DoCall(evmtypes.TransactionArgs{
@@ -176,7 +200,7 @@ func (m *EvmBackend) evmCall(_4bytes string, contract common.Address, chainId *h
 		Gas:      &gasB,
 		GasPrice: &gasPriceB,
 		Nonce:    &nonceB,
-		Input:    &dataB,
+		Input:    &inputB,
 		ChainID:  chainId,
 	}, evmosrpctypes.BlockNumber(blockNumber))
 	if err != nil {

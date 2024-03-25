@@ -5,11 +5,15 @@ package backend
 import (
 	berpcbackend "github.com/bcdevtools/block-explorer-rpc-cosmos/be_rpc/backend"
 	berpctypes "github.com/bcdevtools/block-explorer-rpc-cosmos/be_rpc/types"
+	berpcutils "github.com/bcdevtools/block-explorer-rpc-cosmos/be_rpc/utils"
 	iberpcbackend "github.com/bcdevtools/integrate-block-explorer-rpc-cosmos/integrate_be_rpc/backend/evm"
+	iberpcutils "github.com/bcdevtools/integrate-block-explorer-rpc-cosmos/integrate_be_rpc/utils"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"math/big"
 	"strings"
 )
 
@@ -49,8 +53,13 @@ func (m *DefaultRequestInterceptor) GetDenomsInformation() (intercepted, append 
 		return
 	}
 
-	intercepted = false
-	append = true
+	intercepted = false // provide information for the account, so we don't need to ignore other response information
+	defer func() {
+		if err == nil {
+			append = true
+		}
+	}()
+
 	denoms = map[string]string{
 		"evm": evmParams.EvmDenom,
 	}
@@ -86,5 +95,82 @@ func (m *DefaultRequestInterceptor) GetModuleParams(moduleName string) (intercep
 	}
 
 	intercepted = true
+	return
+}
+
+// GetAccount returns the contract information if the account is a contract. Other-wise no-op.
+func (m *DefaultRequestInterceptor) GetAccount(accountAddressStr string) (intercepted, append bool, response berpctypes.GenericBackendResponse, err error) {
+	accAddrStr := berpcutils.ConvertToAccAddressIfHexOtherwiseKeepAsIs(accountAddressStr)
+
+	accAddr, err := sdk.AccAddressFromBech32(accAddrStr)
+	if err != nil {
+		// not an account address, ignore
+		intercepted = false
+		append = false
+		return
+	}
+
+	if len(accAddr.Bytes()) != common.AddressLength {
+		// not an EVM account address, ignore
+		intercepted = false
+		append = false
+		return
+	}
+
+	intercepted = false // provide information for the account, so we don't need to ignore other response information
+	defer func() {
+		if err == nil {
+			append = true
+		} else {
+			response = nil // eraser
+		}
+	}()
+
+	address := common.BytesToAddress(accAddr.Bytes())
+	response = make(berpctypes.GenericBackendResponse)
+
+	code, err := m.backend.GetContractCode(address)
+	if err != nil {
+		err = status.Error(codes.Internal, errors.Wrap(err, "failed to check contract code").Error())
+		return
+	}
+
+	if len(code) == 0 {
+		// not a contract, ignore
+		return
+	}
+
+	call := func(input string) ([]byte, error) {
+		return m.backend.EvmCall(input, address, nil, nil, 0)
+	}
+
+	contractInfo := make(berpctypes.GenericBackendResponse)
+	response["contract"] = contractInfo
+
+	symbol, err := call("0x95d89b41") // symbol()
+	if err == nil {
+		if len(symbol) > 0 {
+			unpackedSymbol, err := iberpcutils.UnpackAbiString(symbol, "symbol")
+			if err == nil {
+				contractInfo["symbol"] = unpackedSymbol
+			}
+		}
+	}
+
+	decimals, err := call("0x313ce567") // decimals()
+	if err == nil {
+		contractInfo["decimals"] = new(big.Int).SetBytes(decimals).Int64()
+	}
+
+	name, err := call("0x06fdde03") // name()
+	if err == nil {
+		if len(name) > 0 {
+			unpackedName, err := iberpcutils.UnpackAbiString(name, "name")
+			if err == nil {
+				contractInfo["name"] = unpackedName
+			}
+		}
+	}
+
 	return
 }

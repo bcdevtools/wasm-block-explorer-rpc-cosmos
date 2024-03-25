@@ -10,6 +10,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/evmos/evmos/v12/rpc/backend"
 	evmostypes "github.com/evmos/evmos/v12/types"
 	evmtypes "github.com/evmos/evmos/v12/x/evm/types"
@@ -31,6 +32,12 @@ type EvmBackendI interface {
 	GetErc20ContractInfo(contractAddress common.Address) (berpctypes.GenericBackendResponse, error)
 
 	GetErc20Balance(accountAddress common.Address, contractAddresses []common.Address) (berpctypes.GenericBackendResponse, error)
+
+	// EVM
+
+	EvmCall(input string, contract common.Address, optionalChainId *hexutil.Big, optionalBlockNumber *hexutil.Uint64, optionalGas uint64) ([]byte, error)
+
+	GetContractCode(contractAddress common.Address) ([]byte, error)
 
 	// Misc
 

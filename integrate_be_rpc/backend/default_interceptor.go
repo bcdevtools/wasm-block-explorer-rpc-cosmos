@@ -32,10 +32,17 @@ func (m *DefaultRequestInterceptor) GetTransactionByHash(hashStr string) (interc
 
 func (m *DefaultRequestInterceptor) GetDenomsInformation() (intercepted, append bool, denoms map[string]string, err error) {
 	intercepted = false
+	append = false
 	return
 }
 
 func (m *DefaultRequestInterceptor) GetModuleParams(moduleName string) (intercepted bool, res berpctypes.GenericBackendResponse, err error) {
 	intercepted = false
+	return
+}
+
+func (m *DefaultRequestInterceptor) GetAccount(accountAddressStr string) (intercepted, append bool, response berpctypes.GenericBackendResponse, err error) {
+	intercepted = false
+	append = false
 	return
 }
