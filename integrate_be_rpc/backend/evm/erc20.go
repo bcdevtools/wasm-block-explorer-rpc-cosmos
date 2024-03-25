@@ -141,7 +141,7 @@ func (m *EvmBackend) GetErc20Balance(accountAddress common.Address, contractAddr
 			resPerContract["decimals"] = new(big.Int).SetBytes(decimals).Int64()
 		}
 
-		balance, err := call("0x70a08231" + hexutil.Encode(common.LeftPadBytes(accountAddress.Bytes(), 32))[2:])
+		balance, err := call("0x70a08231" /*balanceOf(address)*/ + hexutil.Encode(common.LeftPadBytes(accountAddress.Bytes(), 32))[2:])
 		if err != nil {
 			return nil, err
 		}
@@ -172,17 +172,12 @@ func (m *EvmBackend) evmCall(_4bytes string, contract common.Address, chainId *h
 	gasPriceB := hexutil.Big(*(new(big.Int).SetUint64(math.MaxUint64)))
 	nonceB := hexutil.Uint64(0)
 	res, err := m.evmJsonRpcBackend.DoCall(evmtypes.TransactionArgs{
-		From:                 nil,
-		To:                   &contract,
-		Gas:                  &gasB,
-		GasPrice:             &gasPriceB,
-		MaxFeePerGas:         nil,
-		MaxPriorityFeePerGas: nil,
-		Value:                nil,
-		Nonce:                &nonceB,
-		Input:                &dataB,
-		AccessList:           nil,
-		ChainID:              chainId,
+		To:       &contract,
+		Gas:      &gasB,
+		GasPrice: &gasPriceB,
+		Nonce:    &nonceB,
+		Input:    &dataB,
+		ChainID:  chainId,
 	}, evmosrpctypes.BlockNumber(blockNumber))
 	if err != nil {
 		return nil, err
