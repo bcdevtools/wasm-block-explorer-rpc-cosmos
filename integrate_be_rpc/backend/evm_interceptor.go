@@ -102,6 +102,14 @@ func (m *DefaultRequestInterceptor) GetModuleParams(moduleName string) (intercep
 func (m *DefaultRequestInterceptor) GetAccount(accountAddressStr string) (intercepted, append bool, response berpctypes.GenericBackendResponse, err error) {
 	accAddrStr := berpcutils.ConvertToAccAddressIfHexOtherwiseKeepAsIs(accountAddressStr)
 
+	if !strings.HasPrefix(accAddrStr, sdk.GetConfig().GetBech32AccountAddrPrefix()+"1") &&
+		!strings.HasPrefix(accAddrStr, "0x") {
+		// not an account address, ignore
+		intercepted = false
+		append = false
+		return
+	}
+
 	accAddr, err := sdk.AccAddressFromBech32(accAddrStr)
 	if err != nil {
 		// not an account address, ignore
