@@ -215,9 +215,42 @@ func ParseMsgExecuteContract(sdkMsg sdk.Msg, msgIdx uint, tx *tx.Tx, txResponse 
 
 	// TODO BE: implement error message if any
 
+	transfers := make([]berpctypes.GenericBackendResponse, 0)
+	for _, event := range txResponse.Events {
+		match, kv := berpcutils.IsEventTypeWithAllAttributes(
+			event,
+			wasmtypes.WasmModuleEventType,
+			wasmtypes.AttributeKeyContractAddr,
+			"action",
+			"from",
+			"to",
+			"amount",
+		)
+		if !match {
+			continue
+		}
+
+		if kv["action"] != "transfer" {
+			continue
+		}
+
+		transfers = append(transfers, berpctypes.GenericBackendResponse{
+			"from":   kv["from"],
+			"to":     kv["to"],
+			"amount": kv["amount"],
+		})
+	}
+
+	action := make(berpctypes.GenericBackendResponse)
+	if len(transfers) > 0 {
+		action["transfers"] = transfers
+	}
+
+	res["action"] = action
+
 	berpctypes.NewFriendlyResponseContentBuilder().
 		WriteAddress(msg.Sender).
-		WriteText(" executes contract").
+		WriteText(" executes contract ").
 		WriteAddress(msg.Contract).
 		BuildIntoResponse(res)
 
@@ -254,15 +287,15 @@ func ParseMsgIBCSend(sdkMsg sdk.Msg, msgIdx uint, tx *tx.Tx, txResponse *sdk.TxR
 		WriteText(msg.Channel)
 
 	if msg.TimeoutHeight > 0 {
-		rb.WriteText(" with timeout block height ").WriteText(fmt.Sprintf("%d", msg.TimeoutHeight))
+		rb.WriteText(" with timeout-block-height ").WriteText(fmt.Sprintf("%d", msg.TimeoutHeight))
 	} else {
-		rb.WriteText(" without timeout block height")
+		rb.WriteText(" without timeout-block-height")
 	}
 
 	if msg.TimeoutTimestamp > 0 {
-		rb.WriteText(" with timeout timestamp ").WriteText(fmt.Sprintf("%d seconds", msg.TimeoutTimestamp/1_000_000_000))
+		rb.WriteText(" with timeout-timestamp ").WriteText(fmt.Sprintf("%d seconds", msg.TimeoutTimestamp/1_000_000_000))
 	} else {
-		rb.WriteText(" without timeout timestamp")
+		rb.WriteText(" without timeout-timestamp")
 	}
 
 	rb.BuildIntoResponse(res)
