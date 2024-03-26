@@ -5,7 +5,6 @@ package backend
 import (
 	berpcbackend "github.com/bcdevtools/block-explorer-rpc-cosmos/be_rpc/backend"
 	berpctypes "github.com/bcdevtools/block-explorer-rpc-cosmos/be_rpc/types"
-	berpcutils "github.com/bcdevtools/block-explorer-rpc-cosmos/be_rpc/utils"
 	iberpcbackend "github.com/bcdevtools/integrate-block-explorer-rpc-cosmos/integrate_be_rpc/backend/evm"
 	iberpcutils "github.com/bcdevtools/integrate-block-explorer-rpc-cosmos/integrate_be_rpc/utils"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -20,6 +19,7 @@ import (
 type DefaultRequestInterceptor struct {
 	beRpcBackend berpcbackend.BackendI
 	backend      iberpcbackend.EvmBackendI
+	bech32Cfg    berpctypes.Bech32Config
 }
 
 func NewDefaultRequestInterceptor(
@@ -29,6 +29,7 @@ func NewDefaultRequestInterceptor(
 	return &DefaultRequestInterceptor{
 		beRpcBackend: beRpcBackend,
 		backend:      backend,
+		bech32Cfg:    berpctypes.NewBech32Config(),
 	}
 }
 
@@ -100,10 +101,9 @@ func (m *DefaultRequestInterceptor) GetModuleParams(moduleName string) (intercep
 
 // GetAccount returns the contract information if the account is a contract. Other-wise no-op.
 func (m *DefaultRequestInterceptor) GetAccount(accountAddressStr string) (intercepted, append bool, response berpctypes.GenericBackendResponse, err error) {
-	accAddrStr := berpcutils.ConvertToAccAddressIfHexOtherwiseKeepAsIs(accountAddressStr)
+	accAddrStr := m.bech32Cfg.ConvertToAccAddressIfHexOtherwiseKeepAsIs(accountAddressStr)
 
-	if !strings.HasPrefix(accAddrStr, sdk.GetConfig().GetBech32AccountAddrPrefix()+"1") &&
-		!strings.HasPrefix(accAddrStr, "0x") {
+	if !m.bech32Cfg.IsAccountAddr(accAddrStr) && !strings.HasPrefix(accAddrStr, "0x") {
 		// not an account address, ignore
 		intercepted = false
 		append = false
