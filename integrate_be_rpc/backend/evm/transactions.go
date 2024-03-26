@@ -9,7 +9,10 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/core/vm"
+	evmtypes "github.com/evmos/evmos/v12/x/evm/types"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -173,19 +176,57 @@ func (m *EvmBackend) GetEvmTransactionByHash(hash common.Hash) (berpctypes.Gener
 	txRes := cosmosTxResult.TxResponse
 	txEvents := berpctypes.ConvertTxEvent(txRes.Events).RemoveUnnecessaryEvmTxEvents()
 
+	isSuccessTx := txRes.Code == 0 && func() bool {
+		if receipt == nil {
+			return false
+		}
+		status, found := receipt["status"]
+		if !found {
+			return false
+		}
+		return uint64(status.(hexutil.Uint)) == ethtypes.ReceiptStatusSuccessful
+	}()
+
 	res := berpctypes.GenericBackendResponse{
 		"hash":        hash,
 		"height":      blockNumber,
 		"evm_tx":      rpcTx,
 		"evm_receipt": receipt,
 		"result": map[string]any{
-			"code":   txRes.Code,
-			"events": txEvents,
+			"code":    txRes.Code,
+			"success": isSuccessTx,
+			"events":  txEvents,
 			"gas": berpctypes.GenericBackendResponse{
 				"limit": txRes.GasWanted,
 				"used":  txRes.GasUsed,
 			},
 		},
+	}
+
+	if !isSuccessTx {
+		var vmErr string
+		for _, event := range txEvents {
+			if event.Type != evmtypes.EventTypeEthereumTx {
+				continue
+			}
+
+			for _, attribute := range event.Attributes {
+				if attribute.Key != evmtypes.AttributeKeyEthereumTxFailed {
+					continue
+				}
+
+				vmErr = attribute.Value
+				break
+			}
+
+			break
+		}
+
+		if vmErr == "" {
+			vmErr = vm.ErrExecutionReverted.Error()
+		}
+
+		res["evm_error"] = vmErr
 	}
 
 	return res, nil
