@@ -104,6 +104,10 @@ func (m *EvmBackend) GetErc20Balance(accountAddress common.Address, contractAddr
 	resForContracts := make([]berpctypes.GenericBackendResponse, 0)
 
 	for _, contractAddress := range contractAddresses {
+		var display string
+		var decimals int64
+		var balance *big.Int
+
 		resCode, err := m.queryClient.EvmQueryClient.Code(m.ctx, &evmtypes.QueryCodeRequest{
 			Address: contractAddress.String(),
 		})
@@ -112,45 +116,48 @@ func (m *EvmBackend) GetErc20Balance(accountAddress common.Address, contractAddr
 		}
 
 		if len(resCode.Code) == 0 {
-			return nil, status.Error(codes.InvalidArgument, errors.New(fmt.Sprintf("%s is not a contract", contractAddress)).Error())
-		}
-
-		call := func(input string) ([]byte, error) {
-			return m.EvmCall(input, contractAddress, chainId, &blockNumber, 0)
-		}
-
-		resPerContract := berpctypes.GenericBackendResponse{
-			"contract": contractAddress.String(),
-		}
-
-		display, err := call("0x95d89b41") // symbol()
-		if err != nil {
-			// retry with name
-			display, err = call("0x06fdde03") // name()
-		}
-		if err != nil {
-			return nil, status.Error(codes.Internal, errors.Wrapf(err, "failed to get name or symbol of %s", contractAddress).Error())
-		}
-		unpackedDisplay, err := iberpcutils.UnpackAbiString(display, "symbol")
-		if err != nil {
-			resPerContract["display"] = fmt.Sprintf("(%s)", contractAddress.String()) // force value
+			display = ""
+			decimals = 0
+			balance = big.NewInt(0)
 		} else {
-			resPerContract["display"] = unpackedDisplay
+			call := func(input string) ([]byte, error) {
+				return m.EvmCall(input, contractAddress, chainId, &blockNumber, 0)
+			}
+
+			displayBz, err := call("0x95d89b41") // symbol()
+			if err != nil {
+				// retry with name
+				displayBz, err = call("0x06fdde03") // name()
+			}
+			if err != nil {
+				return nil, status.Error(codes.Internal, errors.Wrapf(err, "failed to get name or symbol of %s", contractAddress).Error())
+			}
+			unpackedDisplay, err := iberpcutils.UnpackAbiString(displayBz, "symbol")
+			if err != nil {
+				display = fmt.Sprintf("(%s)", contractAddress.String()) // force value
+			} else {
+				display = unpackedDisplay
+			}
+
+			decimalsBz, err := call("0x313ce567") // decimals()
+			if err != nil {
+				return nil, status.Error(codes.Internal, errors.Wrapf(err, "failed to get decimals of %s", contractAddress).Error())
+			}
+			decimals = new(big.Int).SetBytes(decimalsBz).Int64()
+
+			balanceBz, err := call("0x70a08231" /*balanceOf(address)*/ + hexutil.Encode(common.LeftPadBytes(accountAddress.Bytes(), 32))[2:])
+			if err != nil {
+				return nil, status.Error(codes.Internal, errors.Wrapf(err, "failed to get balance of %s on contract %s", accountAddress, contractAddress).Error())
+			}
+			balance = new(big.Int).SetBytes(balanceBz)
 		}
 
-		decimals, err := call("0x313ce567") // decimals()
-		if err != nil {
-			return nil, status.Error(codes.Internal, errors.Wrapf(err, "failed to get decimals of %s", contractAddress).Error())
-		}
-		resPerContract["decimals"] = new(big.Int).SetBytes(decimals).Int64()
-
-		balance, err := call("0x70a08231" /*balanceOf(address)*/ + hexutil.Encode(common.LeftPadBytes(accountAddress.Bytes(), 32))[2:])
-		if err != nil {
-			return nil, status.Error(codes.Internal, errors.Wrapf(err, "failed to get balance of %s on contract %s", accountAddress, contractAddress).Error())
-		}
-		resPerContract["balance"] = new(big.Int).SetBytes(balance).String()
-
-		resForContracts = append(resForContracts, resPerContract)
+		resForContracts = append(resForContracts, berpctypes.GenericBackendResponse{
+			"contract": contractAddress.String(),
+			"display":  display,
+			"decimals": decimals,
+			"balance":  balance.String(),
+		})
 	}
 
 	res["erc20_balances"] = resForContracts
