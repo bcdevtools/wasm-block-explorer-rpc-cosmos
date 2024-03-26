@@ -3,7 +3,7 @@
 package evm
 
 import (
-	iberpcbackend "github.com/bcdevtools/integrate-block-explorer-rpc-cosmos/integrate_be_rpc/backend/evm"
+	ieberpcbackend "github.com/bcdevtools/integrate-block-explorer-rpc-cosmos/integrate_be_rpc/backend/evm"
 	"github.com/bcdevtools/integrate-block-explorer-rpc-cosmos/integrate_be_rpc/compatible"
 	"github.com/cosmos/cosmos-sdk/server"
 )
@@ -15,7 +15,7 @@ type API struct {
 // NewEvmBeAPI creates an instance of the EVM Block Explorer API.
 func NewEvmBeAPI(
 	ctx *server.Context,
-	backend iberpcbackend.EvmBackendI,
+	backend ieberpcbackend.EvmBackendI,
 ) *API {
 	compatible.PanicInvalidBuildTag()
 	return nil

@@ -1,6 +1,6 @@
-//go:build !be_json_rpc_evm
+//go:build !be_json_rpc_wasm
 
-package evm
+package wasm
 
 import (
 	berpctypes "github.com/bcdevtools/block-explorer-rpc-cosmos/be_rpc/types"
@@ -15,27 +15,27 @@ import (
 This file is used to get rid of compile error in IDE.
 */
 
-var _ EvmBackendI = (*EvmBackend)(nil)
+var _ WasmBackendI = (*WasmBackend)(nil)
 
-type EvmBackendI interface {
-	GetEvmTransactionInvolversByHash(hash common.Hash) (berpctypes.MessageInvolversResult, error)
+type WasmBackendI interface {
+	GetWasmTransactionInvolversByHash(hash common.Hash) (berpctypes.MessageInvolversResult, error)
 }
 
-type EvmBackend struct {
+type WasmBackend struct {
 }
 
-// NewEvmBackend creates a new EvmBackend instance for EVM Block Explorer.
+// NewWasmBackend creates a new WasmBackend instance for EVM Block Explorer.
 // This method is for get rid of build error in IDE in final chains.
-func NewEvmBackend(
+func NewWasmBackend(
 	ctx *server.Context,
 	logger log.Logger,
 	clientCtx client.Context,
 	externalServices berpctypes.ExternalServices,
-) *EvmBackend {
+) *WasmBackend {
 	compatible.PanicInvalidBuildTag()
 	return nil
 }
 
-func (m *EvmBackend) GetEvmTransactionInvolversByHash(hash common.Hash) (berpctypes.MessageInvolversResult, error) {
+func (m *WasmBackend) GetWasmTransactionInvolversByHash(hash common.Hash) (berpctypes.MessageInvolversResult, error) {
 	return nil, nil
 }

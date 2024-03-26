@@ -10,6 +10,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/tendermint/tendermint v0.34.29
 	google.golang.org/grpc v1.57.1
+	github.com/CosmWasm/wasmd v0.33.0
 )
 
 require (
@@ -159,4 +160,5 @@ replace (
 	github.com/bcdevtools/integrate-block-explorer-rpc-cosmos => /Users/hungphamviet/Dev/bcdevtools/integrate-block-explorer-rpc-cosmos
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
 	github.com/tendermint/tendermint => github.com/cometbft/cometbft v0.34.28
+	github.com/CosmWasm/wasmd => github.com/decentrio/wasmd v0.33.0-sdk46.2
 )

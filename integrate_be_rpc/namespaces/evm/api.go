@@ -4,7 +4,7 @@ package evm
 
 import (
 	"fmt"
-	iberpcbackend "github.com/bcdevtools/integrate-block-explorer-rpc-cosmos/integrate_be_rpc/backend/evm"
+	ieberpcbackend "github.com/bcdevtools/integrate-block-explorer-rpc-cosmos/integrate_be_rpc/backend/evm"
 	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/tendermint/tendermint/libs/log"
 )
@@ -13,17 +13,17 @@ import (
 type API struct {
 	ctx     *server.Context
 	logger  log.Logger
-	backend iberpcbackend.EvmBackendI
+	backend ieberpcbackend.EvmBackendI
 }
 
 // NewEvmBeAPI creates an instance of the EVM Block Explorer API.
 func NewEvmBeAPI(
 	ctx *server.Context,
-	backend iberpcbackend.EvmBackendI,
+	backend ieberpcbackend.EvmBackendI,
 ) *API {
 	return &API{
 		ctx:     ctx,
-		logger:  ctx.Logger.With("api", "rae"),
+		logger:  ctx.Logger.With("api", "evm"),
 		backend: backend,
 	}
 }
