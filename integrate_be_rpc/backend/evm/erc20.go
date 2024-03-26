@@ -4,6 +4,7 @@ package evm
 
 import (
 	"encoding/hex"
+	"fmt"
 	berpctypes "github.com/bcdevtools/block-explorer-rpc-cosmos/be_rpc/types"
 	iberpcutils "github.com/bcdevtools/integrate-block-explorer-rpc-cosmos/integrate_be_rpc/utils"
 	"github.com/ethereum/go-ethereum/common"
@@ -100,6 +101,8 @@ func (m *EvmBackend) GetErc20Balance(accountAddress common.Address, contractAddr
 		return nil, err
 	}
 
+	resForContracts := make([]berpctypes.GenericBackendResponse, 0)
+
 	for _, contractAddress := range contractAddresses {
 		resCode, err := m.queryClient.EvmQueryClient.Code(m.ctx, &evmtypes.QueryCodeRequest{
 			Address: contractAddress.String(),
@@ -109,7 +112,7 @@ func (m *EvmBackend) GetErc20Balance(accountAddress common.Address, contractAddr
 		}
 
 		if len(resCode.Code) == 0 {
-			return nil, status.Error(codes.NotFound, errors.New("not a contract").Error())
+			return nil, status.Error(codes.InvalidArgument, errors.New(fmt.Sprintf("%s is not a contract", contractAddress)).Error())
 		}
 
 		call := func(input string) ([]byte, error) {
@@ -125,32 +128,32 @@ func (m *EvmBackend) GetErc20Balance(accountAddress common.Address, contractAddr
 			// retry with name
 			display, err = call("0x06fdde03") // name()
 		}
-		if err == nil && len(display) > 0 {
-			unpackedDisplay, err := iberpcutils.UnpackAbiString(display, "symbol")
-			if err != nil {
-				resPerContract["display_error"] = err.Error()
-			} else {
-				resPerContract["display"] = unpackedDisplay
-			}
-		} else if err != nil {
-			resPerContract["display_error"] = err.Error()
+		if err != nil {
+			return nil, status.Error(codes.Internal, errors.Wrapf(err, "failed to get name or symbol of %s", contractAddress).Error())
+		}
+		unpackedDisplay, err := iberpcutils.UnpackAbiString(display, "symbol")
+		if err != nil {
+			resPerContract["display"] = fmt.Sprintf("(%s)", contractAddress.String()) // force value
+		} else {
+			resPerContract["display"] = unpackedDisplay
 		}
 
 		decimals, err := call("0x313ce567") // decimals()
 		if err != nil {
-			resPerContract["decimals_error"] = err.Error()
-		} else {
-			resPerContract["decimals"] = new(big.Int).SetBytes(decimals).Int64()
+			return nil, status.Error(codes.Internal, errors.Wrapf(err, "failed to get decimals of %s", contractAddress).Error())
 		}
+		resPerContract["decimals"] = new(big.Int).SetBytes(decimals).Int64()
 
 		balance, err := call("0x70a08231" /*balanceOf(address)*/ + hexutil.Encode(common.LeftPadBytes(accountAddress.Bytes(), 32))[2:])
 		if err != nil {
-			return nil, err
+			return nil, status.Error(codes.Internal, errors.Wrapf(err, "failed to get balance of %s on contract %s", accountAddress, contractAddress).Error())
 		}
 		resPerContract["balance"] = new(big.Int).SetBytes(balance).String()
 
-		res[contractAddress.String()] = resPerContract
+		resForContracts = append(resForContracts, resPerContract)
 	}
+
+	res["erc20_balances"] = resForContracts
 
 	return res, nil
 }
