@@ -7,7 +7,6 @@ import (
 	"github.com/bcdevtools/wasm-block-explorer-rpc-cosmos/integrate_be_rpc/compatible"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/server"
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/tendermint/tendermint/libs/log"
 )
 
@@ -18,7 +17,7 @@ This file is used to get rid of compile error in IDE.
 var _ WasmBackendI = (*WasmBackend)(nil)
 
 type WasmBackendI interface {
-	GetWasmTransactionInvolversByHash(hash common.Hash) (berpctypes.MessageInvolversResult, error)
+	GetWasmTransactionInvolversByHash(hash string) (berpctypes.MessageInvolversResult, error)
 }
 
 type WasmBackend struct {
@@ -36,6 +35,6 @@ func NewWasmBackend(
 	return nil
 }
 
-func (m *WasmBackend) GetWasmTransactionInvolversByHash(hash common.Hash) (berpctypes.MessageInvolversResult, error) {
+func (m *WasmBackend) GetWasmTransactionInvolversByHash(hash string) (berpctypes.MessageInvolversResult, error) {
 	return nil, nil
 }

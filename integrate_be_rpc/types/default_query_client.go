@@ -1,4 +1,4 @@
-//go:build !be_json_rpc_evm && !be_json_rpc_wasm
+//go:build !be_json_rpc_wasm
 
 package types
 

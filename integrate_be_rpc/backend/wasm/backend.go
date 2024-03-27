@@ -10,7 +10,6 @@ import (
 	iberpctypes "github.com/bcdevtools/wasm-block-explorer-rpc-cosmos/integrate_be_rpc/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/server"
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/tendermint/tendermint/libs/log"
 )
 
@@ -20,9 +19,9 @@ type WasmBackendI interface {
 	// Transactions
 
 	// GetWasmTransactionByHash returns a transaction by its hash.
-	GetWasmTransactionByHash(hash common.Hash) (berpctypes.GenericBackendResponse, error)
+	GetWasmTransactionByHash(hash string) (berpctypes.GenericBackendResponse, error)
 
-	GetWasmTransactionInvolversByHash(hash common.Hash) (berpctypes.MessageInvolversResult, error)
+	GetWasmTransactionInvolversByHash(hash string) (berpctypes.MessageInvolversResult, error)
 
 	// CW-20
 
