@@ -3,8 +3,8 @@
 package evm
 
 import (
-	ieberpcbackend "github.com/bcdevtools/integrate-block-explorer-rpc-cosmos/integrate_be_rpc/backend/evm"
-	"github.com/bcdevtools/integrate-block-explorer-rpc-cosmos/integrate_be_rpc/compatible"
+	ieberpcbackend "github.com/bcdevtools/wasm-block-explorer-rpc-cosmos/integrate_be_rpc/backend/evm"
+	"github.com/bcdevtools/wasm-block-explorer-rpc-cosmos/integrate_be_rpc/compatible"
 	"github.com/cosmos/cosmos-sdk/server"
 )
 

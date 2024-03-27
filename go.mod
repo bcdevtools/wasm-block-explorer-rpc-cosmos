@@ -1,4 +1,4 @@
-module github.com/bcdevtools/integrate-block-explorer-rpc-cosmos
+module github.com/bcdevtools/wasm-block-explorer-rpc-cosmos
 
 go 1.19
 
@@ -161,7 +161,6 @@ require (
 replace (
 	github.com/CosmWasm/wasmd => github.com/decentrio/wasmd v0.33.0-sdk46.2
 	github.com/bcdevtools/block-explorer-rpc-cosmos => /Users/hungphamviet/Dev/bcdevtools/block-explorer-rpc-cosmos
-	github.com/bcdevtools/integrate-block-explorer-rpc-cosmos => /Users/hungphamviet/Dev/bcdevtools/integrate-block-explorer-rpc-cosmos
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
 	github.com/tendermint/tendermint => github.com/cometbft/cometbft v0.34.28
 )

@@ -6,7 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	berpctypes "github.com/bcdevtools/block-explorer-rpc-cosmos/be_rpc/types"
-	iberpcutils "github.com/bcdevtools/integrate-block-explorer-rpc-cosmos/integrate_be_rpc/utils"
+	iberpcutils "github.com/bcdevtools/wasm-block-explorer-rpc-cosmos/integrate_be_rpc/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	evmosrpctypes "github.com/evmos/evmos/v12/rpc/types"

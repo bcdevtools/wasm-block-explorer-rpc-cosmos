@@ -3,8 +3,8 @@
 package wasm
 
 import (
-	iwberpcbackend "github.com/bcdevtools/integrate-block-explorer-rpc-cosmos/integrate_be_rpc/backend/wasm"
-	"github.com/bcdevtools/integrate-block-explorer-rpc-cosmos/integrate_be_rpc/compatible"
+	iwberpcbackend "github.com/bcdevtools/wasm-block-explorer-rpc-cosmos/integrate_be_rpc/backend/wasm"
+	"github.com/bcdevtools/wasm-block-explorer-rpc-cosmos/integrate_be_rpc/compatible"
 	"github.com/cosmos/cosmos-sdk/server"
 )
 

@@ -4,7 +4,7 @@ package evm
 
 import (
 	"fmt"
-	ieberpcbackend "github.com/bcdevtools/integrate-block-explorer-rpc-cosmos/integrate_be_rpc/backend/evm"
+	ieberpcbackend "github.com/bcdevtools/wasm-block-explorer-rpc-cosmos/integrate_be_rpc/backend/evm"
 	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/tendermint/tendermint/libs/log"
 )

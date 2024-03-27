@@ -4,7 +4,7 @@ package wasm
 
 import (
 	"fmt"
-	iwberpcbackend "github.com/bcdevtools/integrate-block-explorer-rpc-cosmos/integrate_be_rpc/backend/wasm"
+	iwberpcbackend "github.com/bcdevtools/wasm-block-explorer-rpc-cosmos/integrate_be_rpc/backend/wasm"
 	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/tendermint/tendermint/libs/log"
 )
