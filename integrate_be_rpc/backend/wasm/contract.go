@@ -1,5 +1,3 @@
-//go:build be_json_rpc_wasm
-
 package wasm
 
 import (

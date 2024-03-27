@@ -1,5 +1,3 @@
-//go:build be_json_rpc_wasm
-
 package backend
 
 import (
@@ -10,6 +8,8 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
+
+var _ berpcbackend.RequestInterceptor = (*DefaultRequestInterceptor)(nil)
 
 type DefaultRequestInterceptor struct {
 	beRpcBackend berpcbackend.BackendI
