@@ -11,7 +11,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/tendermint/tendermint/libs/log"
 )
 
@@ -25,17 +24,17 @@ type WasmBackendI interface {
 
 	GetWasmTransactionInvolversByHash(hash common.Hash) (berpctypes.MessageInvolversResult, error)
 
-	// ERC-20
+	// CW-20
 
-	GetErc20ContractInfo(contractAddress common.Address) (berpctypes.GenericBackendResponse, error)
+	GetCw20ContractInfo(contractAddress string) (berpctypes.GenericBackendResponse, error)
 
-	GetErc20Balance(accountAddress common.Address, contractAddresses []common.Address) (berpctypes.GenericBackendResponse, error)
+	GetCw20Balance(accountAddress string, contractAddresses []string) (berpctypes.GenericBackendResponse, error)
 
-	// EVM
+	// Wasm
 
-	EvmCall(input string, contract common.Address, optionalChainId *hexutil.Big, optionalBlockNumber *hexutil.Uint64, optionalGas uint64) ([]byte, error)
+	SmartContractState(input map[string]any, contract string, optionalBlockNumber *int64) ([]byte, error)
 
-	GetContractCode(contractAddress common.Address) ([]byte, error)
+	GetContractCodeId(contractAddress string) (uint64, error)
 
 	// Misc
 

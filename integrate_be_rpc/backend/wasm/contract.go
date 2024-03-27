@@ -3,10 +3,15 @@
 package wasm
 
 import (
-	"github.com/ethereum/go-ethereum/common"
+	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 )
 
-func (m *WasmBackend) GetContractCode(contractAddress common.Address) ([]byte, error) {
-	// TODO BE: implement
-	return nil, nil
+func (m *WasmBackend) GetContractCodeId(contractAddress string) (uint64, error) {
+	resContractInfo, err := m.queryClient.WasmQueryClient.ContractInfo(m.ctx, &wasmtypes.QueryContractInfoRequest{
+		Address: contractAddress,
+	})
+	if err != nil {
+		return 0, err
+	}
+	return resContractInfo.CodeID, nil
 }
