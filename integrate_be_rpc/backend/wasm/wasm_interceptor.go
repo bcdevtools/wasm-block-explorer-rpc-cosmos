@@ -1,9 +1,8 @@
-package backend
+package wasm
 
 import (
 	berpcbackend "github.com/bcdevtools/block-explorer-rpc-cosmos/be_rpc/backend"
 	berpctypes "github.com/bcdevtools/block-explorer-rpc-cosmos/be_rpc/types"
-	iwberpcbackend "github.com/bcdevtools/wasm-block-explorer-rpc-cosmos/integrate_be_rpc/backend/wasm"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -13,13 +12,13 @@ var _ berpcbackend.RequestInterceptor = (*DefaultRequestInterceptor)(nil)
 
 type DefaultRequestInterceptor struct {
 	beRpcBackend berpcbackend.BackendI
-	backend      iwberpcbackend.WasmBackendI
+	backend      WasmBackendI
 	bech32Cfg    berpctypes.Bech32Config
 }
 
 func NewDefaultRequestInterceptor(
 	beRpcBackend berpcbackend.BackendI,
-	backend iwberpcbackend.WasmBackendI,
+	backend WasmBackendI,
 ) *DefaultRequestInterceptor {
 	return &DefaultRequestInterceptor{
 		beRpcBackend: beRpcBackend,
