@@ -160,7 +160,7 @@ func (m *EvmBackend) GetErc20Balance(accountAddress common.Address, contractAddr
 		})
 	}
 
-	res["erc20_balances"] = resForContracts
+	res["erc20Balances"] = resForContracts
 
 	return res, nil
 }

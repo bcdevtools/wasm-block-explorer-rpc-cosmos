@@ -4,6 +4,7 @@ package wasm
 
 import (
 	"encoding/json"
+	"fmt"
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	berpctypes "github.com/bcdevtools/block-explorer-rpc-cosmos/be_rpc/types"
 	berpcutils "github.com/bcdevtools/block-explorer-rpc-cosmos/be_rpc/utils"
@@ -15,9 +16,10 @@ import (
 )
 
 // GetCw20ContractInfo will return information of CW-20 contract by address.
-//   - name (optional): the name of the CW-20 token.
-//   - symbol (mandatory): the symbol of the CW-20 token.
-//   - decimals (mandatory): the number of decimals the token uses.
+//   - name: the name of the CW-20 token.
+//   - symbol: the symbol of the CW-20 token.
+//   - decimals: the number of decimals the token uses.
+//   - totalSupply: the total supply of the token.
 //
 // If failed to query any of the mandatory fields, it will return an error.
 // If failed to query the optional field, it will continue.
@@ -27,17 +29,95 @@ func (m *WasmBackend) GetCw20ContractInfo(contractAddress string) (berpctypes.Ge
 		return nil, err
 	}
 
-	return berpctypes.GenericBackendResponse{
-		"name":        tokenInfo.Name,
-		"symbol":      tokenInfo.Symbol,
-		"decimals":    tokenInfo.Decimals,
-		"totalSupply": tokenInfo.TotalSupply,
-	}, nil
+	res := berpctypes.GenericBackendResponse{
+		"name":     tokenInfo.Name,
+		"symbol":   tokenInfo.Symbol,
+		"decimals": tokenInfo.Decimals,
+	}
+
+	if tokenInfo.TotalSupply != nil {
+		res["totalSupply"] = tokenInfo.TotalSupply.String()
+	}
+
+	return res, nil
 }
 
 func (m *WasmBackend) GetCw20Balance(accountAddress string, contractAddresses []string) (berpctypes.GenericBackendResponse, error) {
-	// TODO BE: implement
-	return nil, nil
+	res := berpctypes.GenericBackendResponse{
+		"account": accountAddress,
+	}
+
+	resForContracts := make([]berpctypes.GenericBackendResponse, 0)
+
+	for _, contractAddress := range contractAddresses {
+		var display string
+		var decimals uint8
+		var balance *big.Int
+
+		codeId, err := m.GetContractCodeId(contractAddress)
+		if err != nil {
+			return nil, err
+		}
+
+		if codeId == 0 {
+			display = ""
+			decimals = 0
+			balance = big.NewInt(0)
+		} else {
+			tokenInfo, err := m.GetCw20TokenInfo(contractAddress)
+			if err != nil {
+				return nil, err
+			}
+
+			if len(tokenInfo.Symbol) > 0 {
+				display = tokenInfo.Symbol
+			} else if len(tokenInfo.Name) > 0 {
+				display = tokenInfo.Name
+			} else {
+				display = fmt.Sprintf("(%s)", contractAddress) // force value
+			}
+
+			decimals = tokenInfo.Decimals
+
+			state, err := m.SmartContractState(map[string]any{
+				"balance": map[string]any{
+					"address": accountAddress,
+				},
+			}, contractAddress, nil)
+			if err != nil {
+				return nil, status.Error(codes.Internal, errors.Wrap(err, "failed to get contract state").Error())
+			}
+			if len(state) < 1 {
+				return nil, status.Error(codes.NotFound, errors.New("no response contract state").Error())
+			}
+
+			var data struct {
+				Balance string `json:"balance"`
+			}
+
+			err = json.Unmarshal(state, &data)
+			if err != nil {
+				return nil, status.Error(codes.Internal, errors.Wrap(err, "failed to unmarshal response").Error())
+			}
+
+			var ok bool
+			balance, ok = new(big.Int).SetString(data.Balance, 10)
+			if !ok {
+				return nil, status.Error(codes.Internal, errors.New("failed to parse balance "+data.Balance).Error())
+			}
+		}
+
+		resForContracts = append(resForContracts, berpctypes.GenericBackendResponse{
+			"contract": contractAddress,
+			"display":  display,
+			"decimals": decimals,
+			"balance":  balance.String(),
+		})
+	}
+
+	res["cw20Balances"] = resForContracts
+
+	return res, nil
 }
 
 func (m *WasmBackend) SmartContractState(input map[string]any, contract string, optionalBlockNumber *int64) ([]byte, error) {
@@ -85,10 +165,6 @@ func (m *WasmBackend) GetCw20TokenInfo(contractAddress string) (*iberpctypes.Cw2
 	if len(state) < 1 {
 		return nil, status.Error(codes.NotFound, errors.New("no response contract state").Error())
 	}
-
-	defer func() {
-		m.logger.Error(string(state))
-	}()
 
 	var data iberpctypes.Cw20TokenInfo
 

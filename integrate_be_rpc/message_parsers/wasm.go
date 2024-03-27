@@ -34,7 +34,7 @@ func ParseMsgStoreCode(sdkMsg sdk.Msg, msgIdx uint, tx *tx.Tx, txResponse *sdk.T
 		"sender": msg.Sender,
 	}
 	if msg.InstantiatePermission != nil {
-		res["instantiate_permission"] = map[string]any{
+		res["instantiatePermission"] = map[string]any{
 			"permission": msg.InstantiatePermission.Permission.String(),
 			"addresses":  msg.InstantiatePermission.Addresses,
 		}
@@ -63,7 +63,7 @@ func ParseMsgStoreCode(sdkMsg sdk.Msg, msgIdx uint, tx *tx.Tx, txResponse *sdk.T
 	}
 
 	if len(codeId) > 0 {
-		res["code_id"] = codeId
+		res["codeId"] = codeId
 		rb.WriteText(", code-id = ").WriteText(codeId)
 	}
 
@@ -81,9 +81,9 @@ func ParseMsgInstantiateContract(sdkMsg sdk.Msg, msgIdx uint, tx *tx.Tx, txRespo
 	msg := sdkMsg.(*wasmtypes.MsgInstantiateContract)
 
 	res = berpctypes.GenericBackendResponse{
-		"sender":  msg.Sender,
-		"code_id": msg.CodeID,
-		"msg":     msg.Msg,
+		"sender": msg.Sender,
+		"codeId": msg.CodeID,
+		"msg":    msg.Msg,
 	}
 	if msg.Admin != "" {
 		res["admin"] = msg.Admin
@@ -92,7 +92,7 @@ func ParseMsgInstantiateContract(sdkMsg sdk.Msg, msgIdx uint, tx *tx.Tx, txRespo
 		var unmarshalledMsg map[string]any
 		err = json.Unmarshal(msg.Msg, &unmarshalledMsg)
 		if err == nil {
-			res["constructor_msg"] = unmarshalledMsg
+			res["ctorMsg"] = unmarshalledMsg
 		}
 	}
 
@@ -117,7 +117,7 @@ func ParseMsgInstantiateContract(sdkMsg sdk.Msg, msgIdx uint, tx *tx.Tx, txRespo
 	}
 
 	if len(contractAddress) > 0 {
-		res["contract_address"] = contractAddress
+		res["contractAddress"] = contractAddress
 		rb.WriteText(" ").WriteAddress(contractAddress)
 	}
 
@@ -132,9 +132,9 @@ func ParseMsgInstantiateContract2(sdkMsg sdk.Msg, msgIdx uint, tx *tx.Tx, txResp
 	msg := sdkMsg.(*wasmtypes.MsgInstantiateContract2)
 
 	res = berpctypes.GenericBackendResponse{
-		"sender":  msg.Sender,
-		"code_id": msg.CodeID,
-		"msg":     msg.Msg,
+		"sender": msg.Sender,
+		"codeId": msg.CodeID,
+		"msg":    msg.Msg,
 	}
 	if msg.Admin != "" {
 		res["admin"] = msg.Admin
@@ -143,7 +143,7 @@ func ParseMsgInstantiateContract2(sdkMsg sdk.Msg, msgIdx uint, tx *tx.Tx, txResp
 		var unmarshalledMsg map[string]any
 		err = json.Unmarshal(msg.Msg, &unmarshalledMsg)
 		if err == nil {
-			res["constructor_msg"] = unmarshalledMsg
+			res["ctorMsg"] = unmarshalledMsg
 		}
 	}
 
@@ -168,7 +168,7 @@ func ParseMsgInstantiateContract2(sdkMsg sdk.Msg, msgIdx uint, tx *tx.Tx, txResp
 	}
 
 	if len(contractAddress) > 0 {
-		res["contract_address"] = contractAddress
+		res["contractAddress"] = contractAddress
 		rb.WriteText(" ").WriteAddress(contractAddress)
 	}
 
@@ -209,7 +209,7 @@ func ParseMsgExecuteContract(sdkMsg sdk.Msg, msgIdx uint, tx *tx.Tx, txResponse 
 		var unmarshalledMsg map[string]any
 		err = json.Unmarshal(msg.Msg, &unmarshalledMsg)
 		if err == nil {
-			res["input_msg"] = unmarshalledMsg
+			res["inputMsg"] = unmarshalledMsg
 		}
 	}
 
@@ -276,10 +276,10 @@ func ParseMsgIBCSend(sdkMsg sdk.Msg, msgIdx uint, tx *tx.Tx, txResponse *sdk.TxR
 	msg := sdkMsg.(*wasmtypes.MsgIBCSend)
 
 	res = berpctypes.GenericBackendResponse{
-		"channel":              msg.Channel,
-		"data":                 hex.EncodeToString(msg.Data),
-		"timeout_height":       msg.TimeoutHeight,
-		"timeout_timestamp_ns": msg.TimeoutTimestamp,
+		"channel":               msg.Channel,
+		"data":                  hex.EncodeToString(msg.Data),
+		"timeoutHeight":         msg.TimeoutHeight,
+		"timeoutTimestampNanos": msg.TimeoutTimestamp,
 	}
 
 	rb := berpctypes.NewFriendlyResponseContentBuilder().
@@ -309,14 +309,14 @@ func ParseMsgMigrateContract(sdkMsg sdk.Msg, msgIdx uint, tx *tx.Tx, txResponse 
 	res = berpctypes.GenericBackendResponse{
 		"sender":   msg.Sender,
 		"contract": msg.Contract,
-		"code_id":  msg.CodeID,
+		"codeId":   msg.CodeID,
 	}
 
 	if len(msg.Msg) > 0 {
 		var unmarshalledMsg map[string]any
 		err = json.Unmarshal(msg.Msg, &unmarshalledMsg)
 		if err == nil {
-			res["migration_msg"] = unmarshalledMsg
+			res["migrationMsg"] = unmarshalledMsg
 		}
 	}
 
@@ -337,9 +337,9 @@ func ParseMsgUpdateAdmin(sdkMsg sdk.Msg, msgIdx uint, tx *tx.Tx, txResponse *sdk
 	msg := sdkMsg.(*wasmtypes.MsgUpdateAdmin)
 
 	res = berpctypes.GenericBackendResponse{
-		"sender":    msg.Sender,
-		"contract":  msg.Contract,
-		"new_admin": msg.NewAdmin,
+		"sender":   msg.Sender,
+		"contract": msg.Contract,
+		"newAdmin": msg.NewAdmin,
 	}
 
 	berpctypes.NewFriendlyResponseContentBuilder().
@@ -357,12 +357,12 @@ func ParseMsgUpdateInstantiateConfig(sdkMsg sdk.Msg, msgIdx uint, tx *tx.Tx, txR
 	msg := sdkMsg.(*wasmtypes.MsgUpdateInstantiateConfig)
 
 	res = berpctypes.GenericBackendResponse{
-		"sender":  msg.Sender,
-		"code_id": msg.CodeID,
+		"sender": msg.Sender,
+		"codeId": msg.CodeID,
 	}
 
 	if msg.NewInstantiatePermission != nil {
-		res["instantiate_permission"] = map[string]any{
+		res["instantiatePermission"] = map[string]any{
 			"permission": msg.NewInstantiatePermission.Permission.String(),
 			"addresses":  msg.NewInstantiatePermission.Addresses,
 		}

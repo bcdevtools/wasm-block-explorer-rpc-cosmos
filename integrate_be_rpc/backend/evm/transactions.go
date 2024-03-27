@@ -188,10 +188,10 @@ func (m *EvmBackend) GetEvmTransactionByHash(hash common.Hash) (berpctypes.Gener
 	}()
 
 	res := berpctypes.GenericBackendResponse{
-		"hash":        hash,
-		"height":      blockNumber,
-		"evm_tx":      rpcTx,
-		"evm_receipt": receipt,
+		"hash":       hash,
+		"height":     blockNumber,
+		"evmTx":      rpcTx,
+		"evmReceipt": receipt,
 		"result": map[string]any{
 			"code":    txRes.Code,
 			"success": isSuccessTx,
@@ -226,7 +226,7 @@ func (m *EvmBackend) GetEvmTransactionByHash(hash common.Hash) (berpctypes.Gener
 			vmErr = vm.ErrExecutionReverted.Error()
 		}
 
-		res["evm_error"] = vmErr
+		res["evmError"] = vmErr
 	}
 
 	return res, nil
