@@ -4,8 +4,9 @@ go 1.19
 
 require (
 	github.com/CosmWasm/wasmd v0.33.0
-	github.com/bcdevtools/block-explorer-rpc-cosmos v0.0.0
+	github.com/bcdevtools/block-explorer-rpc-cosmos v1.0.1
 	github.com/cosmos/cosmos-sdk v0.46.15
+	github.com/ethereum/go-ethereum v1.10.26
 	github.com/pkg/errors v0.9.1
 	github.com/tendermint/tendermint v0.34.29
 	google.golang.org/grpc v1.57.1
@@ -51,7 +52,6 @@ require (
 	github.com/docker/distribution v2.8.2+incompatible // indirect
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/dvsekhvalnov/jose2go v1.5.0 // indirect
-	github.com/ethereum/go-ethereum v1.10.26 // indirect
 	github.com/felixge/httpsnoop v1.0.1 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/go-kit/kit v0.12.0 // indirect
@@ -147,7 +147,6 @@ require (
 
 replace (
 	github.com/CosmWasm/wasmd => github.com/decentrio/wasmd v0.33.0-sdk46.2
-	github.com/bcdevtools/block-explorer-rpc-cosmos => /Users/hungphamviet/Dev/bcdevtools/block-explorer-rpc-cosmos
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
 	github.com/tendermint/tendermint => github.com/cometbft/cometbft v0.34.28
 )
