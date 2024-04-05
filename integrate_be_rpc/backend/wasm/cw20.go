@@ -41,6 +41,11 @@ func (m *WasmBackend) GetCw20ContractInfo(contractAddress string) (berpctypes.Ge
 }
 
 func (m *WasmBackend) GetCw20Balance(accountAddress string, contractAddresses []string) (berpctypes.GenericBackendResponse, error) {
+	const maxContractsPerQuery = 50
+	if len(contractAddresses) > maxContractsPerQuery {
+		return nil, status.Error(codes.InvalidArgument, errors.New("too many contracts to query").Error())
+	}
+
 	res := berpctypes.GenericBackendResponse{
 		"account": accountAddress,
 	}
