@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/CosmWasm/wasmd v0.33.0
-	github.com/bcdevtools/block-explorer-rpc-cosmos v1.0.2
+	github.com/bcdevtools/block-explorer-rpc-cosmos v1.0.3
 	github.com/cosmos/cosmos-sdk v0.46.15
 	github.com/ethereum/go-ethereum v1.10.26
 	github.com/pkg/errors v0.9.1

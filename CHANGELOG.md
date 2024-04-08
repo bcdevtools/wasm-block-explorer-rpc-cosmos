@@ -57,5 +57,10 @@ Templates for Unreleased:
 ## Unreleased
 
 #### Improvements
+- (deps) [#3](https://github.com/bcdevtools/wasm-block-explorer-rpc-cosmos/pull/3) Bumps `block-explorer-rpc-cosmos` to v1.0.3
+
+## v1.0.2 - 2024-04-05
+
+#### Improvements
 - (deps) [#1](https://github.com/bcdevtools/wasm-block-explorer-rpc-cosmos/pull/1) Bumps `block-explorer-rpc-cosmos` to v1.0.2
 - (contract) [#2](https://github.com/bcdevtools/wasm-block-explorer-rpc-cosmos/pull/2) Limit number of contracts per CW-20 balances query to 50
