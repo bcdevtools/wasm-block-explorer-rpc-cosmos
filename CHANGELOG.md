@@ -56,6 +56,8 @@ Templates for Unreleased:
 
 ## Unreleased
 
+## v1.0.3 - 2024-04-12
+
 #### Improvements
 - (deps) [#3](https://github.com/bcdevtools/wasm-block-explorer-rpc-cosmos/pull/3) Bumps `block-explorer-rpc-cosmos` to v1.0.3
 - (contract) [#4](https://github.com/bcdevtools/wasm-block-explorer-rpc-cosmos/pull/4) Intercept account info, return contract code id if is contract
