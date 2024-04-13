@@ -56,7 +56,7 @@ Templates for Unreleased:
 
 ## Unreleased
 
-## v1.1.0 - 2024-04-14
+## v1.1.1 - 2024-04-14
 
 ### Improvements
 
