@@ -8,6 +8,7 @@ import (
 	berpctypes "github.com/bcdevtools/block-explorer-rpc-cosmos/be_rpc/types"
 	berpcserver "github.com/bcdevtools/block-explorer-rpc-cosmos/server"
 	wasmberpcbackend "github.com/bcdevtools/wasm-block-explorer-rpc-cosmos/integrate_be_rpc/backend/wasm"
+	bemsgivxtrac "github.com/bcdevtools/wasm-block-explorer-rpc-cosmos/integrate_be_rpc/message_involves_extractors"
 	bemsgparsers "github.com/bcdevtools/wasm-block-explorer-rpc-cosmos/integrate_be_rpc/message_parsers"
 	wasmbeapi "github.com/bcdevtools/wasm-block-explorer-rpc-cosmos/integrate_be_rpc/namespaces/wasm"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -69,6 +70,7 @@ func StartWasmBeJsonRPC(
 	// register message parsers & message involvers extractor
 
 	bemsgparsers.RegisterMessageParsersForWasm()
+	bemsgivxtrac.RegisterMessageInvolvesExtractorsForWasm(wasmBeRpcBackend)
 
 	var interceptorCreationFunc func(berpcbackend.BackendI) berpcbackend.RequestInterceptor
 	if customInterceptorCreationFunc != nil {
