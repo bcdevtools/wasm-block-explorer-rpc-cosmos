@@ -8,7 +8,9 @@ import (
 	iberpctypes "github.com/bcdevtools/wasm-block-explorer-rpc-cosmos/integrate_be_rpc/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/server"
+	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/libs/log"
+	tmtypes "github.com/tendermint/tendermint/types"
 )
 
 var _ WasmBackendI = (*WasmBackend)(nil)
@@ -21,9 +23,13 @@ type WasmBackendI interface {
 
 	GetWasmTransactionInvolversByHash(hash string) (berpctypes.MessageInvolversResult, error)
 
+	GetTmTxResult(tmTx tmtypes.Tx) ([]abci.Event, error)
+
 	// CW-20
 
 	GetCw20ContractInfo(contractAddress string) (berpctypes.GenericBackendResponse, error)
+
+	GetCw20TokenInfo(contractAddress string) (*iberpctypes.Cw20TokenInfo, error)
 
 	GetCw20Balance(accountAddress string, contractAddresses []string) (berpctypes.GenericBackendResponse, error)
 
