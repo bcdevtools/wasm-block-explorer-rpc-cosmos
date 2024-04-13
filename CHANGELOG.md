@@ -41,29 +41,37 @@ Templates for Unreleased:
 
 ## Unreleased
 
-#### Features
+### Features
 
-#### Improvements
+### Improvements
 
-#### Bug Fixes
+### Bug Fixes
 
-#### Schema Breaking
+### Schema Breaking
 
-#### API Breaking
+### API Breaking
 -->
 
 # Changelog
 
 ## Unreleased
 
+## v1.1.0 - 2024-04-14
+
+### API Breaking
+
+- (deps) [#5](https://github.com/bcdevtools/wasm-block-explorer-rpc-cosmos/pull/5) Bumps `block-explorer-rpc-cosmos` to v1.1.0
+
 ## v1.0.3 - 2024-04-12
 
-#### Improvements
+### Improvements
+
 - (deps) [#3](https://github.com/bcdevtools/wasm-block-explorer-rpc-cosmos/pull/3) Bumps `block-explorer-rpc-cosmos` to v1.0.3
 - (contract) [#4](https://github.com/bcdevtools/wasm-block-explorer-rpc-cosmos/pull/4) Intercept account info, return contract code id if is contract
 
 ## v1.0.2 - 2024-04-05
 
-#### Improvements
+### Improvements
+
 - (deps) [#1](https://github.com/bcdevtools/wasm-block-explorer-rpc-cosmos/pull/1) Bumps `block-explorer-rpc-cosmos` to v1.0.2
 - (contract) [#2](https://github.com/bcdevtools/wasm-block-explorer-rpc-cosmos/pull/2) Limit number of contracts per CW-20 balances query to 50
