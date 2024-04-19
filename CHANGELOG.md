@@ -56,12 +56,15 @@ Templates for Unreleased:
 
 ## Unreleased
 
+### Improvements
+- (deps) [#8](https://github.com/bcdevtools/wasm-block-explorer-rpc-cosmos/pull/8) Bumps `block-explorer-rpc-cosmos` to v1.1.2
+
 ## v1.1.1 - 2024-04-14
 
 ### Improvements
 
 - (tx) [#6](https://github.com/bcdevtools/wasm-block-explorer-rpc-cosmos/pull/6) Extract involvers for Wasm txs
-- (deps) [#6](https://github.com/bcdevtools/wasm-block-explorer-rpc-cosmos/pull/6) Bumps `block-explorer-rpc-cosmos` to v1.1.1
+- (deps) [#7](https://github.com/bcdevtools/wasm-block-explorer-rpc-cosmos/pull/7) Bumps `block-explorer-rpc-cosmos` to v1.1.1
 
 ### API Breaking
 
